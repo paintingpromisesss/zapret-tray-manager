@@ -1,0 +1,16 @@
+# build artifacts
+build/
+dist/
+cmd/rsrc_windows_amd64.syso
+
+# runtime data
+zapret-*/
+config.json
+custom_strategies/
+
+# tooling
+.claude/
+.agents/
+.codegraph/
+skills-lock.json
+.vscode/
