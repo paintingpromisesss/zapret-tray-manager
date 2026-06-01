@@ -18,7 +18,7 @@ OutputBaseFilename={#AppName}-{#AppVersion}-setup
 Compression=lzma2
 SolidCompression=yes
 PrivilegesRequired=admin
-SetupIconFile=assets\rkn_blocked_icon.ico
+SetupIconFile=internal\assets\rkn_blocked_icon.ico
 UninstallDisplayIcon={app}\{#AppExeName}
 WizardStyle=modern
 
