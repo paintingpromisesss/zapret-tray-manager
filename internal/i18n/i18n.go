@@ -44,12 +44,7 @@ type Strings struct {
 	ZapretFolderNotFound string
 	OpenPage             string
 
-	UpdateAvailableTitle   string
-	UpdateAvailableHeading string
-	UpdateAvailableBody    string
-	UpdateUpToDateTitle    string
-	UpdateUpToDateHeading  string
-	UpdateUpToDateBody     string
+	UpdateUpToDateHeading string
 
 	LanguageMenu string
 	LangEnglish  string
@@ -98,12 +93,7 @@ var en = Strings{
 	ZapretFolderNotFound: "Zapret folder not found",
 	OpenPage:             "(open page)",
 
-	UpdateAvailableTitle:   "Update available",
-	UpdateAvailableHeading: "A new version %s is available",
-	UpdateAvailableBody:    "Current version: %s.\n\nDownload and install now?",
-	UpdateUpToDateTitle:    "No updates",
-	UpdateUpToDateHeading:  "You are up to date",
-	UpdateUpToDateBody:     "You are running the latest version (%s).",
+	UpdateUpToDateHeading: "You are running the latest version (v%s)",
 
 	LanguageMenu: "Language",
 	LangEnglish:  "English",
@@ -152,12 +142,7 @@ var ru = Strings{
 	ZapretFolderNotFound: "Папка zapret не найдена",
 	OpenPage:             "(открыть страницу)",
 
-	UpdateAvailableTitle:   "Доступно обновление",
-	UpdateAvailableHeading: "Доступна новая версия %s",
-	UpdateAvailableBody:    "Текущая версия: %s.\n\nСкачать и установить сейчас?",
-	UpdateUpToDateTitle:    "Обновлений нет",
-	UpdateUpToDateHeading:  "Установлена последняя версия",
-	UpdateUpToDateBody:     "Установлена последняя версия (%s).",
+	UpdateUpToDateHeading: "Установлена последняя версия (v%s)",
 
 	LanguageMenu: "Язык",
 	LangEnglish:  "English",

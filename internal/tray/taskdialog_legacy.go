@@ -17,10 +17,6 @@ func legacyBody(instruction, content string) string {
 	}
 }
 
-func legacyConfirm(title, instruction, content string) bool {
-	return dialog.Message("%s", legacyBody(instruction, content)).Title(title).YesNo()
-}
-
 func legacyInfo(title, instruction, content string) {
 	dialog.Message("%s", legacyBody(instruction, content)).Title(title).Info()
 }

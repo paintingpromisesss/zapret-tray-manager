@@ -13,18 +13,13 @@ var (
 )
 
 const (
-	tdcbfYesButton = 0x0001 // TDCBF_YES_BUTTON
-	tdcbfNoButton  = 0x0002 // TDCBF_NO_BUTTON
-	tdcbfOKButton  = 0x0004 // TDCBF_OK_BUTTON
-
-	idYes = 6 // IDYES
+	tdcbfOKButton = 0x0004 // TDCBF_OK_BUTTON
 
 	tdfAllowDialogCancellation  = 0x0008 // TDF_ALLOW_DIALOG_CANCELLATION
 	tdfPositionRelativeToWindow = 0x1000 // TDF_POSITION_RELATIVE_TO_WINDOW
 )
 
 const (
-	tdWarningIcon     = 0xFFFF // TD_WARNING_ICON
 	tdErrorIcon       = 0xFFFE // TD_ERROR_ICON
 	tdInformationIcon = 0xFFFD // TD_INFORMATION_ICON
 )
@@ -56,9 +51,9 @@ type taskDialogConfig struct {
 	cxWidth                 uint32
 }
 
-func taskDialog(title, instruction, content string, icon uintptr, buttons uint32) (int32, bool) {
+func taskDialog(title, instruction, content string, icon uintptr, buttons uint32) bool {
 	if procTaskDialogIndirect.Find() != nil {
-		return 0, false
+		return false
 	}
 	cfg := taskDialogConfig{
 		dwFlags:            tdfAllowDialogCancellation | tdfPositionRelativeToWindow,
@@ -78,10 +73,7 @@ func taskDialog(title, instruction, content string, icon uintptr, buttons uint32
 		0,
 		0,
 	)
-	if ret != 0 { // S_OK == 0
-		return 0, false
-	}
-	return pressed, true
+	return ret == 0 // S_OK == 0
 }
 
 func mustUTF16(s string) *uint16 {
@@ -95,22 +87,14 @@ func mustUTF16(s string) *uint16 {
 	return p
 }
 
-func confirmDialog(title, instruction, content string) bool {
-	pressed, ok := taskDialog(title, instruction, content, tdWarningIcon, tdcbfYesButton|tdcbfNoButton)
-	if !ok {
-		return legacyConfirm(title, instruction, content)
-	}
-	return pressed == idYes
-}
-
 func infoDialog(title, instruction, content string) {
-	if _, ok := taskDialog(title, instruction, content, tdInformationIcon, tdcbfOKButton); !ok {
+	if !taskDialog(title, instruction, content, tdInformationIcon, tdcbfOKButton) {
 		legacyInfo(title, instruction, content)
 	}
 }
 
 func errorDialog(title, instruction, content string) {
-	if _, ok := taskDialog(title, instruction, content, tdErrorIcon, tdcbfOKButton); !ok {
+	if !taskDialog(title, instruction, content, tdErrorIcon, tdcbfOKButton) {
 		legacyError(title, instruction, content)
 	}
 }

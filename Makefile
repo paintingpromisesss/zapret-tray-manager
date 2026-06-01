@@ -11,7 +11,7 @@ generate:
 ISCC ?= "C:/Program Files (x86)/Inno Setup 6/iscc.exe"
 
 installer: build
-	$(ISCC) installer.iss
+	$(ISCC) /DAppVersion=$(VERSION) installer.iss
 
 fmt:
 	gofmt -w .

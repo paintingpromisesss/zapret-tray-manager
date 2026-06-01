@@ -43,8 +43,8 @@ func TestIsNewer(t *testing.T) {
 	if IsNewer("1.0.0", "1.0.0") {
 		t.Error("equal versions: not newer")
 	}
-	if !IsNewer("dev", "1.0.0") {
-		t.Error("any release newer than dev build")
+	if IsNewer("dev", "1.0.0") {
+		t.Error("dev build treated as latest: no update offered")
 	}
 }
 

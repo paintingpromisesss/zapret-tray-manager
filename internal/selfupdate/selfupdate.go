@@ -124,6 +124,9 @@ func NormalizeVersion(version string) string {
 }
 
 func IsNewer(current, latest string) bool {
+	if _, ok := parseSemver(current); !ok {
+		return false
+	}
 	return CompareVersions(current, latest) < 0
 }
 

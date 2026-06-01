@@ -10,6 +10,7 @@ import (
 	"zapret-tray-manager/internal/app"
 	"zapret-tray-manager/internal/i18n"
 	"zapret-tray-manager/internal/manager"
+	"zapret-tray-manager/internal/selfupdate"
 	"zapret-tray-manager/internal/zapretver"
 )
 
@@ -52,6 +53,7 @@ type Tray struct {
 	settingsItem       *systray.MenuItem
 	checkUpdatesItem   *systray.MenuItem
 	pendingUpdateVer   string
+	pendingRelease     selfupdate.Release
 	autoRunItem        *systray.MenuItem
 	autostartItem      *systray.MenuItem
 	globalSettingsItem *systray.MenuItem
@@ -172,7 +174,7 @@ func (t *Tray) onReady() {
 	go t.listen(t.removeItem, "Remove services", t.app.Remove)
 
 	t.checkUpdatesItem = systray.AddMenuItem(t.updateCheckLabel(), "")
-	go t.listenGlobal(t.checkUpdatesItem, "Check for updates", t.checkForUpdatesManual)
+	go t.listenGlobal(t.checkUpdatesItem, "Check for updates", t.onCheckUpdatesClicked)
 
 	systray.AddSeparator()
 	t.quitItem = systray.AddMenuItem(t.s.Quit, "")
