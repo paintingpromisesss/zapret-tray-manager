@@ -37,9 +37,6 @@ Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"
 Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
 
 [Run]
-Filename: "schtasks.exe"; \
-  Parameters: "/Create /TN ""ZapretTrayManager"" /TR ""{app}\{#AppExeName}"" /SC ONLOGON /RL HIGHEST /F"; \
-  Flags: runhidden
 Filename: "{app}\{#AppExeName}"; \
   Parameters: "--lang={language}"; \
   Flags: nowait postinstall skipifsilent runascurrentuser; \
@@ -52,6 +49,19 @@ var
 begin
   Exec('taskkill.exe', '/f /im "{#AppExeName}"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   Result := '';
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ExePath, Params: String;
+  ResultCode: Integer;
+begin
+  if CurStep = ssPostInstall then
+  begin
+    ExePath := ExpandConstant('{app}\{#AppExeName}');
+    Params := '/Create /TN "ZapretTrayManager" /TR "\"' + ExePath + '\"" /SC ONLOGON /RL HIGHEST /F';
+    Exec('schtasks.exe', Params, '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  end;
 end;
 
 [UninstallRun]
