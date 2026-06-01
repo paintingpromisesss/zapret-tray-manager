@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"fyne.io/systray"
-	"github.com/sqweek/dialog"
 
+	"zapret-tray-manager/internal/i18n"
 	"zapret-tray-manager/internal/manager"
 	"zapret-tray-manager/internal/service"
 )
@@ -36,7 +36,9 @@ func (t *Tray) applyStatus(status manager.Status) {
 		t.errorItem.SetTitle(t.s.ErrorPrefix + trimMenuText(t.errorText(status.ValidationError)))
 		t.errorItem.Show()
 		if t.lastStatusValid {
-			go dialog.Message("zapret folder is missing or invalid:\n%s\n\n%s", t.app.Config().CurrentRoot, t.errorText(status.ValidationError)).Title("zapret-tray-manager").Error()
+			root := t.app.Config().CurrentRoot
+			detail := t.errorText(status.ValidationError)
+			go errorDialog(i18n.AppTitle, t.s.ZapretFolderNotFound, root+"\n\n"+detail)
 		}
 	}
 	t.lastStatusValid = status.Valid

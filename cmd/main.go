@@ -10,9 +10,13 @@ import (
 	"zapret-tray-manager/internal/config"
 	"zapret-tray-manager/internal/logging"
 	"zapret-tray-manager/internal/manager"
+	"zapret-tray-manager/internal/selfupdate"
 	"zapret-tray-manager/internal/tray"
 	"zapret-tray-manager/internal/zapretver"
 )
+
+// version is the application version, injected at build time via -ldflags "-X main.version=1.2.3". Defaults to "dev" for local builds.
+var version = "dev"
 
 func parseLangArg() string {
 	for _, arg := range os.Args[1:] {
@@ -51,7 +55,8 @@ func main() {
 	httpClient := client.NewClient()
 	mgr := manager.New(cfg.CurrentRoot, logs.Logger)
 	vc := zapretver.NewClient(httpClient)
-	application := app.New(store, cfg, mgr, vc, logs.Logger)
+	uc := selfupdate.NewClient(httpClient)
+	application := app.New(store, cfg, mgr, vc, uc, version, logs.Logger)
 	application.SyncAutoRunFromService()
 	tray.Run(application, logs.Logger, logs.Path)
 }

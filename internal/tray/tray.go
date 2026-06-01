@@ -50,6 +50,8 @@ type Tray struct {
 	ipsetItems       map[manager.IPSetMode]*systray.MenuItem
 
 	settingsItem       *systray.MenuItem
+	checkUpdatesItem   *systray.MenuItem
+	pendingUpdateVer   string
 	autoRunItem        *systray.MenuItem
 	autostartItem      *systray.MenuItem
 	globalSettingsItem *systray.MenuItem
@@ -169,6 +171,9 @@ func (t *Tray) onReady() {
 	go t.listenGlobal(openFolderItem, "Open program folder", t.openProgramFolder)
 	go t.listen(t.removeItem, "Remove services", t.app.Remove)
 
+	t.checkUpdatesItem = systray.AddMenuItem(t.updateCheckLabel(), "")
+	go t.listenGlobal(t.checkUpdatesItem, "Check for updates", t.checkForUpdatesManual)
+
 	systray.AddSeparator()
 	t.quitItem = systray.AddMenuItem(t.s.Quit, "")
 	go func() {
@@ -183,6 +188,7 @@ func (t *Tray) onReady() {
 	t.initVersionsMenu()
 	t.refresh()
 	go t.runGlobalAction("Refresh zapret versions", t.refreshZapretReleases)
+	go t.checkForUpdatesSilent()
 }
 
 func (t *Tray) initGameFilterMenu() {

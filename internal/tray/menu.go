@@ -9,6 +9,7 @@ import (
 
 	"github.com/sqweek/dialog"
 
+	"zapret-tray-manager/internal/i18n"
 	"zapret-tray-manager/internal/manager"
 	"zapret-tray-manager/internal/strategy"
 	"zapret-tray-manager/internal/zapretver"
@@ -259,7 +260,7 @@ func (t *Tray) allocUserLocalSlot() {
 		}
 		if _, err := t.app.FindZapretRoot(path); err != nil {
 			//nolint:nilerr // Invalid local root is handled here (notify + remove); not an action failure.
-			dialog.Message("Folder not found or invalid:\n%s", path).Title("zapret-tray-manager").Info()
+			infoDialog(i18n.AppTitle, t.s.ZapretFolderNotFound, path)
 			if err := t.app.RemoveUserLocalRoot(path); err != nil {
 				t.logger.Warn("failed to remove invalid local root", "path", path, "error", err)
 			}

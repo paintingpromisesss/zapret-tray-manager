@@ -1,5 +1,7 @@
 package i18n
 
+const AppTitle = "Zapret Tray Manager"
+
 type Strings struct {
 	ServiceUnknown  string
 	StrategyUnknown string
@@ -34,11 +36,20 @@ type Strings struct {
 	ShowServiceInfo       string
 	RemoveServices        string
 	RefreshVersions       string
+	CheckForUpdates       string
+	UpdateAvailableMenu   string
 
 	Quit                 string
 	WorkingBusy          string
 	ZapretFolderNotFound string
 	OpenPage             string
+
+	UpdateAvailableTitle   string
+	UpdateAvailableHeading string
+	UpdateAvailableBody    string
+	UpdateUpToDateTitle    string
+	UpdateUpToDateHeading  string
+	UpdateUpToDateBody     string
 
 	LanguageMenu string
 	LangEnglish  string
@@ -79,11 +90,20 @@ var en = Strings{
 	ShowServiceInfo:       "Show service info",
 	RemoveServices:        "Remove services",
 	RefreshVersions:       "Refresh versions",
+	CheckForUpdates:       "Check for updates",
+	UpdateAvailableMenu:   "Update available (%s)",
 
 	Quit:                 "Quit",
 	WorkingBusy:          "Working: busy",
 	ZapretFolderNotFound: "Zapret folder not found",
 	OpenPage:             "(open page)",
+
+	UpdateAvailableTitle:   "Update available",
+	UpdateAvailableHeading: "A new version %s is available",
+	UpdateAvailableBody:    "Current version: %s.\n\nDownload and install now?",
+	UpdateUpToDateTitle:    "No updates",
+	UpdateUpToDateHeading:  "You are up to date",
+	UpdateUpToDateBody:     "You are running the latest version (%s).",
 
 	LanguageMenu: "Language",
 	LangEnglish:  "English",
@@ -124,11 +144,20 @@ var ru = Strings{
 	ShowServiceInfo:       "Информация о службах",
 	RemoveServices:        "Удалить службы",
 	RefreshVersions:       "Обновить список версий",
+	CheckForUpdates:       "Проверить обновления",
+	UpdateAvailableMenu:   "Доступно обновление (%s)",
 
 	Quit:                 "Выход",
 	WorkingBusy:          "Выполняется...",
 	ZapretFolderNotFound: "Папка zapret не найдена",
 	OpenPage:             "(открыть страницу)",
+
+	UpdateAvailableTitle:   "Доступно обновление",
+	UpdateAvailableHeading: "Доступна новая версия %s",
+	UpdateAvailableBody:    "Текущая версия: %s.\n\nСкачать и установить сейчас?",
+	UpdateUpToDateTitle:    "Обновлений нет",
+	UpdateUpToDateHeading:  "Установлена последняя версия",
+	UpdateUpToDateBody:     "Установлена последняя версия (%s).",
 
 	LanguageMenu: "Язык",
 	LangEnglish:  "English",

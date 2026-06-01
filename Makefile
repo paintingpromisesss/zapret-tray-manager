@@ -1,7 +1,9 @@
 .PHONY: fmt lint test vuln check build generate installer
 
+VERSION ?= dev
+
 build:
-	go build -ldflags="-H windowsgui -s -w" -o "build/Zapret Tray Manager.exe" ./cmd
+	go build -ldflags="-H windowsgui -s -w -X main.version=$(VERSION)" -o "build/Zapret Tray Manager.exe" ./cmd
 
 generate:
 	go generate ./cmd

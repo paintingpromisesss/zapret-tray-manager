@@ -7,6 +7,7 @@ import (
 
 	"zapret-tray-manager/internal/config"
 	"zapret-tray-manager/internal/manager"
+	"zapret-tray-manager/internal/selfupdate"
 	"zapret-tray-manager/internal/strategy"
 	"zapret-tray-manager/internal/winexec"
 	"zapret-tray-manager/internal/zapretver"
@@ -28,6 +29,8 @@ type App struct {
 	cfg            *config.Config
 	manager        *manager.Manager
 	verClient      *zapretver.Client
+	updateClient   *selfupdate.Client
+	version        string
 	logger         *slog.Logger
 	mu             sync.Mutex
 	busy           bool
@@ -35,7 +38,15 @@ type App struct {
 	vpnAfterAction func()
 }
 
-func New(store *config.Store, cfg *config.Config, mgr *manager.Manager, vc *zapretver.Client, logger *slog.Logger) *App {
+func New(
+	store *config.Store,
+	cfg *config.Config,
+	mgr *manager.Manager,
+	vc *zapretver.Client,
+	uc *selfupdate.Client,
+	version string,
+	logger *slog.Logger,
+) *App {
 	if cfg == nil {
 		cfg = config.Default()
 	}
@@ -43,14 +54,20 @@ func New(store *config.Store, cfg *config.Config, mgr *manager.Manager, vc *zapr
 		logger = slog.Default()
 	}
 	a := &App{
-		store:     store,
-		cfg:       cfg,
-		manager:   mgr,
-		verClient: vc,
-		logger:    logger,
+		store:        store,
+		cfg:          cfg,
+		manager:      mgr,
+		verClient:    vc,
+		updateClient: uc,
+		version:      version,
+		logger:       logger,
 	}
 	a.syncTunWatcher()
 	return a
+}
+
+func (a *App) Version() string {
+	return a.version
 }
 
 func (a *App) Config() config.Config {
