@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"zapret-tray-manager/internal/manager"
+	"zapret-tray-manager/internal/service"
 	"zapret-tray-manager/internal/winexec"
 )
 
@@ -111,20 +112,13 @@ func (a *App) SetVPNAfterAction(fn func()) {
 	a.mu.Unlock()
 }
 
-func (a *App) SetVPNStopOnConnect(enabled bool) error {
+func (a *App) SetVPNManageEnabled(enabled bool) error {
 	a.mu.Lock()
-	a.cfg.VPNStopOnConnect = enabled
-	a.mu.Unlock()
-	if err := a.saveConfig(); err != nil {
-		return err
+	a.cfg.VPNManageEnabled = enabled
+	if !enabled {
+		// Management is off, so any pending "we stopped it" record is stale.
+		a.stoppedByVPN = false
 	}
-	a.syncTunWatcher()
-	return nil
-}
-
-func (a *App) SetVPNStartOnDisconnect(enabled bool) error {
-	a.mu.Lock()
-	a.cfg.VPNStartOnDisconnect = enabled
 	a.mu.Unlock()
 	if err := a.saveConfig(); err != nil {
 		return err
@@ -135,7 +129,7 @@ func (a *App) SetVPNStartOnDisconnect(enabled bool) error {
 
 func (a *App) syncTunWatcher() {
 	cfg := a.Config()
-	needWatch := cfg.VPNStopOnConnect || cfg.VPNStartOnDisconnect
+	needWatch := cfg.VPNManageEnabled
 
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -152,17 +146,46 @@ func (a *App) syncTunWatcher() {
 }
 
 func (a *App) onTunConnect() {
-	if !a.Config().VPNStopOnConnect {
+	if !a.Config().VPNManageEnabled {
+		return
+	}
+	// Only stop (and remember we did) if zapret is actually running. If it was
+	// already stopped, leave stoppedByVPN false so the matching disconnect does
+	// not auto-start something the user never had running.
+	st, err := a.manager.ServiceStatus()
+	if err != nil {
+		a.logger.Warn("vpn: could not query zapret state on tun connect", "error", err)
+		a.runVPNAfterAction()
+		return
+	}
+	if st.Zapret != service.StateRunning && st.Zapret != service.StateStartPending {
+		a.runVPNAfterAction()
 		return
 	}
 	if err := a.RunExclusive("vpn: stop on tun connect", a.manager.Stop); err != nil {
 		a.logger.Warn("vpn: failed to stop zapret on tun connect", "error", err)
+	} else {
+		a.mu.Lock()
+		a.stoppedByVPN = true
+		a.mu.Unlock()
 	}
 	a.runVPNAfterAction()
 }
 
 func (a *App) onTunDisconnect() {
-	if !a.Config().VPNStartOnDisconnect {
+	// Consume the flag regardless of config: this disconnect pairs with the
+	// connect that set it, so it must not leak into a later disconnect even if
+	// auto-start is currently off.
+	a.mu.Lock()
+	shouldStart := a.stoppedByVPN
+	a.stoppedByVPN = false
+	a.mu.Unlock()
+
+	if !a.Config().VPNManageEnabled {
+		return
+	}
+	// Only restart zapret if we are the ones who stopped it on VPN connect.
+	if !shouldStart {
 		return
 	}
 	if err := a.RunExclusive("vpn: start on tun disconnect", a.manager.Start); err != nil {

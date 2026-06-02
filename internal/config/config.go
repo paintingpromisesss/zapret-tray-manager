@@ -33,8 +33,10 @@ type Config struct {
 	GlobalGameFilter      string `json:"global_game_filter" mapstructure:"global_game_filter"`
 	GlobalIPSetMode       string `json:"global_ipset_mode" mapstructure:"global_ipset_mode"`
 
-	VPNStopOnConnect     bool `json:"vpn_stop_on_connect" mapstructure:"vpn_stop_on_connect"`
-	VPNStartOnDisconnect bool `json:"vpn_start_on_disconnect" mapstructure:"vpn_start_on_disconnect"`
+	// VPNManageEnabled: when on, zapret is stopped when a VPN (tun adapter)
+	// connects and restored when it disconnects — but only if we were the ones
+	// who stopped it.
+	VPNManageEnabled bool `json:"vpn_manage_enabled" mapstructure:"vpn_manage_enabled"`
 
 	ZapretAutoRunEnabled              bool `json:"zapret_auto_run_enabled" mapstructure:"zapret_auto_run_enabled"`
 	ZapretStateRefreshEnabled         bool `json:"zapret_state_refresh_enabled" mapstructure:"zapret_state_refresh_enabled"`
@@ -117,8 +119,7 @@ func (s *Store) Write(cfg *Config) error {
 	s.v.Set("global_settings_enabled", cfg.GlobalSettingsEnabled)
 	s.v.Set("global_game_filter", cfg.GlobalGameFilter)
 	s.v.Set("global_ipset_mode", cfg.GlobalIPSetMode)
-	s.v.Set("vpn_stop_on_connect", cfg.VPNStopOnConnect)
-	s.v.Set("vpn_start_on_disconnect", cfg.VPNStartOnDisconnect)
+	s.v.Set("vpn_manage_enabled", cfg.VPNManageEnabled)
 
 	err := s.v.WriteConfigAs(s.path)
 	if err != nil {

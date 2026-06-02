@@ -57,8 +57,7 @@ type Tray struct {
 	autoRunItem        *systray.MenuItem
 	autostartItem      *systray.MenuItem
 	globalSettingsItem *systray.MenuItem
-	vpnStopItem        *systray.MenuItem
-	vpnStartItem       *systray.MenuItem
+	vpnManageItem      *systray.MenuItem
 	langEnItem         *systray.MenuItem
 	langRuItem         *systray.MenuItem
 	viewLogsItem       *systray.MenuItem
@@ -69,6 +68,11 @@ type Tray struct {
 	statusMu        sync.Mutex
 	lastStatus      manager.Status
 	lastStatusValid bool
+
+	// lastFingerprint is the hash of the state the menu was last rendered from.
+	// hasFingerprint is false until the first render so the menu always draws once.
+	lastFingerprint uint64
+	hasFingerprint  bool
 
 	timerMu sync.Mutex
 	timer   *time.Timer
@@ -141,9 +145,7 @@ func (t *Tray) onReady() {
 	t.autostartItem = t.settingsItem.AddSubMenuItemCheckbox(t.s.AutostartWithWindows, "", false)
 	t.autoRunItem = t.settingsItem.AddSubMenuItemCheckbox(t.s.AutoRunService, "", false)
 	t.globalSettingsItem = t.settingsItem.AddSubMenuItemCheckbox(t.s.GlobalIPSetGameFilter, "", false)
-	vpnInteractionItem := t.settingsItem.AddSubMenuItem(t.s.VPNInteraction, "")
-	t.vpnStopItem = vpnInteractionItem.AddSubMenuItemCheckbox(t.s.VPNStopOnConnect, "", false)
-	t.vpnStartItem = vpnInteractionItem.AddSubMenuItemCheckbox(t.s.VPNStartOnDisconnect, "", false)
+	t.vpnManageItem = t.settingsItem.AddSubMenuItemCheckbox(t.s.VPNManage, "", false)
 
 	t.settingsItem.AddSeparator()
 
@@ -165,8 +167,7 @@ func (t *Tray) onReady() {
 	go t.listenGlobal(t.autostartItem, "Autostart with Windows", t.toggleWindowsAutostart)
 	go t.listen(t.autoRunItem, "Auto-run service", t.toggleAutoRun)
 	go t.listenGlobal(t.globalSettingsItem, "Global IPSet/GameFilter", t.toggleGlobalSettings)
-	go t.listenGlobal(t.vpnStopItem, "Stop when VPN connects", t.toggleVPNStop)
-	go t.listenGlobal(t.vpnStartItem, "Start when VPN disconnects", t.toggleVPNStart)
+	go t.listenGlobal(t.vpnManageItem, "Manage zapret on VPN", t.toggleVPNManage)
 	go t.listenGlobal(t.viewLogsItem, "View logs", t.viewLogs)
 	go t.listenGlobal(t.exportLogsItem, "Export logs", t.exportLogs)
 	go t.listenGlobal(showServiceInfoItem, "Show service info", t.showServiceInfo)

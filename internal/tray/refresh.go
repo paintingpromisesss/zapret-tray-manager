@@ -6,8 +6,8 @@ import (
 	"fyne.io/systray"
 
 	"zapret-tray-manager/internal/i18n"
-	"zapret-tray-manager/internal/manager"
 	"zapret-tray-manager/internal/service"
+	"zapret-tray-manager/internal/zapretver"
 )
 
 func (t *Tray) refresh() {
@@ -16,18 +16,73 @@ func (t *Tray) refresh() {
 		return
 	}
 
-	status := t.app.Refresh()
+	in := t.collectState()
+
 	t.statusMu.Lock()
-	t.lastStatus = status
+	t.lastStatus = in.status
 	t.statusMu.Unlock()
 
-	t.applyStatus(status)
+	fp := in.fingerprint()
+	if t.hasFingerprint && fp == t.lastFingerprint {
+		// Controlled state is identical to the last render; nothing in the menu
+		// would change. Skip the (otherwise unconditional) item updates.
+		t.scheduleAutoRefresh()
+		return
+	}
+	t.lastFingerprint = fp
+	t.hasFingerprint = true
+
+	t.applyStatus(in)
 	t.scheduleAutoRefresh()
 }
 
+// collectState gathers every input that the menu is rendered from, including
+// the live queries (autostart, release download state, local roots) so they
+// are read exactly once per refresh and can be both fingerprinted and applied.
+func (t *Tray) collectState() stateInputs {
+	status := t.app.Refresh()
+
+	autostartEnabled, autostartErr := t.app.WindowsAutostartEnabled()
+	if autostartErr != nil {
+		t.logger.Warn("could not query Windows autostart state", "error", autostartErr)
+	}
+
+	releases := t.versionReleases
+	if len(releases) > maxReleaseItems {
+		releases = releases[:maxReleaseItems]
+	}
+	downloaded := make([]bool, len(releases))
+	releaseRoots := make([]string, len(releases))
+	localRoots := t.app.LocalZapretRoots()
+	localVersions := make(map[string]struct{}, len(localRoots))
+	for _, r := range localRoots {
+		localVersions[zapretver.NormalizeVersion(r.Version)] = struct{}{}
+	}
+	for i, r := range releases {
+		releaseRoots[i] = t.app.ReleaseRootPath(r)
+		_, isLocal := localVersions[zapretver.NormalizeVersion(r.Version)]
+		downloaded[i] = isLocal || t.app.IsReleaseDownloaded(r)
+	}
+
+	return stateInputs{
+		status:           status,
+		cfg:              t.app.Config(),
+		autostartEnabled: autostartEnabled,
+		autostartErr:     autostartErr != nil,
+		releases:         releases,
+		localRoots:       localRoots,
+		userRoots:        t.app.UserLocalRoots(),
+		downloaded:       downloaded,
+		releaseRoots:     releaseRoots,
+		busy:             t.app.Busy(),
+		pendingUpdateVer: t.pendingUpdateVer,
+	}
+}
+
 //nolint:gocyclo,cyclop,funlen // Maps many independent status fields onto menu items; flat branching is the clearest form.
-func (t *Tray) applyStatus(status manager.Status) {
-	cfg := t.app.Config()
+func (t *Tray) applyStatus(in stateInputs) {
+	status := in.status
+	cfg := in.cfg
 
 	if status.Valid {
 		t.errorItem.SetTitle(t.s.ErrorNone)
@@ -61,14 +116,12 @@ func (t *Tray) applyStatus(status manager.Status) {
 		t.autoRunItem.Uncheck()
 	}
 
-	if autostartEnabled, err := t.app.WindowsAutostartEnabled(); err == nil {
-		if autostartEnabled {
+	if !in.autostartErr {
+		if in.autostartEnabled {
 			t.autostartItem.Check()
 		} else {
 			t.autostartItem.Uncheck()
 		}
-	} else {
-		t.logger.Warn("could not query Windows autostart state", "error", err)
 	}
 
 	if cfg.GlobalSettingsEnabled {
@@ -77,15 +130,10 @@ func (t *Tray) applyStatus(status manager.Status) {
 		t.globalSettingsItem.Uncheck()
 	}
 
-	if cfg.VPNStopOnConnect {
-		t.vpnStopItem.Check()
+	if cfg.VPNManageEnabled {
+		t.vpnManageItem.Check()
 	} else {
-		t.vpnStopItem.Uncheck()
-	}
-	if cfg.VPNStartOnDisconnect {
-		t.vpnStartItem.Check()
-	} else {
-		t.vpnStartItem.Uncheck()
+		t.vpnManageItem.Uncheck()
 	}
 
 	for mode, item := range t.gameItems {

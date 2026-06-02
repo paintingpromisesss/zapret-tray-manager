@@ -23,9 +23,7 @@ type Strings struct {
 	AutoRunService        string
 	AutostartWithWindows  string
 	GlobalIPSetGameFilter string
-	VPNInteraction        string
-	VPNStopOnConnect      string
-	VPNStartOnDisconnect  string
+	VPNManage             string
 	ZapretVersions        string
 	LocalZapret           string
 	AddLocalZapret        string
@@ -72,9 +70,7 @@ var en = Strings{
 	AutoRunService:        "Auto-run service",
 	AutostartWithWindows:  "Autostart with Windows",
 	GlobalIPSetGameFilter: "Global IPSet/GameFilter",
-	VPNInteraction:        "VPN interaction",
-	VPNStopOnConnect:      "Stop when VPN connects",
-	VPNStartOnDisconnect:  "Start when VPN disconnects",
+	VPNManage:             "Pause zapret while VPN is connected",
 	ZapretVersions:        "Zapret versions",
 	LocalZapret:           "Local zapret",
 	AddLocalZapret:        "Add local zapret...",
@@ -121,9 +117,7 @@ var ru = Strings{
 	AutoRunService:        "Автозапуск Zapret",
 	AutostartWithWindows:  "Автозапуск программы",
 	GlobalIPSetGameFilter: "Глобальные IPSet/GameFilter",
-	VPNInteraction:        "Взаимодействие с VPN",
-	VPNStopOnConnect:      "Остановить при подключении VPN",
-	VPNStartOnDisconnect:  "Запустить при отключении VPN",
+	VPNManage:             "Приостанавливать zapret при подключении VPN",
 	ZapretVersions:        "Версии Zapret",
 	LocalZapret:           "Локальный zapret",
 	AddLocalZapret:        "Добавить локальный zapret...",

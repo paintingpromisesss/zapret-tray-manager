@@ -143,30 +143,16 @@ func (t *Tray) toggleGlobalSettings() error {
 	return nil
 }
 
-func (t *Tray) toggleVPNStop() error {
+func (t *Tray) toggleVPNManage() error {
 	cfg := t.app.Config()
-	enabled := !cfg.VPNStopOnConnect
-	if err := t.app.SetVPNStopOnConnect(enabled); err != nil {
+	enabled := !cfg.VPNManageEnabled
+	if err := t.app.SetVPNManageEnabled(enabled); err != nil {
 		return err
 	}
 	if enabled {
-		t.vpnStopItem.Check()
+		t.vpnManageItem.Check()
 	} else {
-		t.vpnStopItem.Uncheck()
-	}
-	return nil
-}
-
-func (t *Tray) toggleVPNStart() error {
-	cfg := t.app.Config()
-	enabled := !cfg.VPNStartOnDisconnect
-	if err := t.app.SetVPNStartOnDisconnect(enabled); err != nil {
-		return err
-	}
-	if enabled {
-		t.vpnStartItem.Check()
-	} else {
-		t.vpnStartItem.Uncheck()
+		t.vpnManageItem.Uncheck()
 	}
 	return nil
 }

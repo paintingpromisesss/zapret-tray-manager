@@ -36,6 +36,11 @@ type App struct {
 	busy           bool
 	tunWatcher     *winexec.TunWatcher
 	vpnAfterAction func()
+	// stoppedByVPN records that zapret was running and we stopped it on a VPN
+	// connect, so that on VPN disconnect we know to restart it. If zapret was
+	// already stopped when the VPN connected, this stays false and disconnect
+	// does nothing. Guarded by mu.
+	stoppedByVPN bool
 }
 
 func New(
